@@ -25,7 +25,6 @@ export async function addProduct(formData) {
     // Scrape product data with Firecrawl
     const productData = await scrapeProduct(url);
     if (!productData.productName || !productData.currentPrice) {
-      console.log("productData", productData);
       return { error: "Could not extract product info from this URL" }
     }
 
@@ -68,7 +67,8 @@ export async function addProduct(formData) {
         {
           product_id: product.id,
           price: newPrice,
-          currency: currency
+          currency: currency,
+          checked_at: new Date().toISOString()
         }
       )
     }
@@ -126,10 +126,11 @@ export async function getPriceHistory(productId) {
       .from("price_history")
       .select("*")
       .eq("product_id", productId)
-      .order("created_at", { ascending: true });
+      .order("checked_at", { ascending: true });
 
     if (error) throw error;
 
+    console.log("data", data)
     revalidatePath("/");
 
     return data || []
